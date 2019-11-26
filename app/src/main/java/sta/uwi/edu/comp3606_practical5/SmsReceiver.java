@@ -9,13 +9,20 @@ import android.telephony.SmsMessage;
 import android.widget.Toast;
 
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
 import static sta.uwi.edu.comp3606_practical5.MainActivity.SentRiddles;
 import static sta.uwi.edu.comp3606_practical5.MainActivity.getHistoryByRiddle;
 import static sta.uwi.edu.comp3606_practical5.MainActivity.riddlesHistory;
 
-public class SmsReceiver extends BroadcastReceiver
+public class SmsReceiver extends BroadcastReceiver implements Serializable
 {
     enum result {WON, ALMOST, LOST};
+    public static ArrayList<Response> responses = new ArrayList<>();
+    public static int responseSize = 0;
 
     @Override
     public void onReceive(Context context, Intent intent)
@@ -41,6 +48,8 @@ public class SmsReceiver extends BroadcastReceiver
             }
             String Ans = recMsg[recMsg.length-1].getMessageBody().toString();
             String phoneNo = recMsg[recMsg.length-1].getOriginatingAddress();
+            responses.add(new Response(phoneNo, Ans));
+            responseSize++;
             HandleRiddles(phoneNo,Ans);
             //---display the SMS message received---
             Toast.makeText(context, recMsg[recMsg.length-1].getOriginatingAddress(), Toast.LENGTH_LONG).show();
@@ -79,12 +88,15 @@ public class SmsReceiver extends BroadcastReceiver
         {
             case WON:
                 msg = "Riddle: " + riddle + "\nCorrect answer! You won!!!\nYou've placed " + position + " on the battlefield.\n";
+                responses.get(responseSize-1).setStatus("WON");
                 break;
             case ALMOST:
                 msg =  "Riddle: " + riddle + "\nSorry, close but not quite.";
+                responses.get(responseSize-1).setStatus("ALMOST");
                 break;
             case LOST:
                 msg = "Riddle: " + riddle + "\nWrong answer try again!";
+                responses.get(responseSize-1).setStatus("LOST");
                 break;
         }
         return msg;
