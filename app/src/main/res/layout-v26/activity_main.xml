@@ -37,13 +37,14 @@
         android:layout_marginEnd="32dp"
         android:background=" #3f3f3f"
         android:ems="10"
-        android:hint="Phone Number "
+        android:hint="@string/phone_number"
         android:inputType="phone"
-        android:text="+15555215556"
+        android:text="@string/_15555215556"
         android:textColor="#00BFA5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:autofillHints="" />
 
     <EditText
         android:id="@+id/solution_et"
@@ -52,12 +53,13 @@
         android:layout_marginTop="32dp"
         android:background=" #3f3f3f"
         android:ems="10"
-        android:hint="Solution"
+        android:hint="@string/solution"
         android:inputType="textPersonName"
         android:textColor="#FF6D00"
         app:layout_constraintEnd_toEndOf="@+id/riddle_et"
         app:layout_constraintStart_toStartOf="@+id/riddle_et"
-        app:layout_constraintTop_toBottomOf="@+id/riddle_et" />
+        app:layout_constraintTop_toBottomOf="@+id/riddle_et"
+        android:autofillHints="" />
 
     <Button
         android:id="@+id/send"
@@ -66,7 +68,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:background=" #3f3f3f"
-        android:text=" Send Riddle "
+        android:text="@string/send_riddle"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="#00C853"
         android:textSize="18sp"

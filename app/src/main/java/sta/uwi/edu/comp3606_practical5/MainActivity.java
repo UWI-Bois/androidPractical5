@@ -16,11 +16,14 @@ public class MainActivity extends AppCompatActivity {
     EditText phoneno_et, riddle_et, solution_et;
     Button send_b;
     public static ArrayList<Riddle_plus_Target> SentRiddles;
+    public static ArrayList<Riddle> riddlesHistory = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         send_b = findViewById(R.id.send);
         phoneno_et = findViewById(R.id.phoneno_et);
@@ -38,36 +41,65 @@ public class MainActivity extends AppCompatActivity {
                 String phoneNo = phoneno_et.getText().toString();
                 String riddle = riddle_et.getText().toString();
                 String solution = solution_et.getText().toString();
-                try {
-                    boolean alreadyPlaying = false;
-                    for (int i = 0; i< SentRiddles.size(); i++)
+                if(!riddle.equals("")&&!solution.equals(""))
+                {
+                    try
                     {
-                        if (SentRiddles.get(i).getPhoneNo().equals(phoneNo)) {
-                            alreadyPlaying = true;
-                            break;
+                        boolean alreadyPlaying = false;
+                        for (int i = 0; i< SentRiddles.size(); i++)
+                        {
+                            if (SentRiddles.get(i).getPhoneNo().equals(phoneNo))
+                            {
+                                alreadyPlaying = true;
+                                break;
+                            }
                         }
+                        if (!alreadyPlaying)
+                        {
+                            SmsManager smsManager = SmsManager.getDefault();
+                            smsManager.sendTextMessage(phoneNo, null,
+                                    "Hello fellow champion! Think you can crack today's riddle?\n" + riddle, null, null);
+
+                            if(getHistoryByRiddle(riddle)==null)
+                            {
+                                Riddle r = new Riddle(riddle,solution);
+                                riddlesHistory.add(r);
+                                SentRiddles.add(new Riddle_plus_Target(phoneNo,riddle,solution,r.getId()));
+                                Toast.makeText(getApplicationContext(), "SMS Riddle Successfully Sent!",
+                                        Toast.LENGTH_LONG).show();
+                            }
+
+                            else
+                            {
+                                SentRiddles.add(new Riddle_plus_Target(phoneNo,riddle,solution,getHistoryByRiddle(riddle).getId()));
+                                Toast.makeText(getApplicationContext(), "SMS Riddle Successfully Sent!", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                        else Toast.makeText(getApplicationContext(), "Error " + phoneNo + " is already working on a riddle", Toast.LENGTH_LONG).show();
                     }
-                    if (!alreadyPlaying)
+                    catch (Exception e)
                     {
-                        SmsManager smsManager = SmsManager.getDefault();
-                        smsManager.sendTextMessage(phoneNo, null,
-                                "Hello fellow champion! Think you can crack today's riddle?\n" + riddle, null, null);
-                        SentRiddles.add(new Riddle_plus_Target(phoneNo,riddle,solution));
-                        Toast.makeText(getApplicationContext(), "SMS Riddle Successfully Sent!",
+                        Toast.makeText(getApplicationContext(),
+                                "SMS Send Failed, error occurred!",
                                 Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
                     }
-                    else Toast.makeText(getApplicationContext(), "Error " + phoneNo + " is already working on a riddle",
-                            Toast.LENGTH_LONG).show();
-
-
-                } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(),
-                            "SMS Send Failed, error occurred!",
-                            Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
                 }
+                else Toast.makeText(getApplicationContext(),"Error0x0: CANNOT LEAVE ABOVE FIELDS EMPTY!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
+    }
+
+    public static Riddle getHistoryByRiddle(String riddle)
+    {
+        if(!riddlesHistory.isEmpty()) for(Riddle r : riddlesHistory) if (r.getRiddle().equals(riddle))return r;
+        return null;
     }
 
 }

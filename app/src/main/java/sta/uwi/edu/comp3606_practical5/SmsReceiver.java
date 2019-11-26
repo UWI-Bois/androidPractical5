@@ -8,10 +8,14 @@ import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.widget.Toast;
 
+
 import static sta.uwi.edu.comp3606_practical5.MainActivity.SentRiddles;
+import static sta.uwi.edu.comp3606_practical5.MainActivity.getHistoryByRiddle;
+import static sta.uwi.edu.comp3606_practical5.MainActivity.riddlesHistory;
 
 public class SmsReceiver extends BroadcastReceiver
 {
+    enum result {WON, ALMOST, LOST};
 
     @Override
     public void onReceive(Context context, Intent intent)
@@ -26,7 +30,8 @@ public class SmsReceiver extends BroadcastReceiver
             //---Access the received SMS message ---
             Object[] pdus = (Object[]) bundle.get("pdus");
             recMsg = new SmsMessage[pdus.length];
-            for (int i=0; i<recMsg.length; i++){
+            for (int i=0; i<recMsg.length; i++)
+            {
                 String format = bundle.getString("format");
                 recMsg[i] = SmsMessage.createFromPdu((byte[]) pdus[i], format);
                 str += "SMS Message received from: " + recMsg[i].getOriginatingAddress();
@@ -51,15 +56,51 @@ public class SmsReceiver extends BroadcastReceiver
                 String msg;
                 if(SentRiddles.get(i).checkAnswer(Ans) == 1)
                 {
-                    msg = "Riddle: " + SentRiddles.get(i).getRiddle() + "\nCorrect answer! You won!!!";
+                    int rid = SentRiddles.get(i).getRiddleid();
+                    for(Riddle r : riddlesHistory) if (r.getId() == rid)r.updateSolvedCount();
+                    msg =  msgStringBuilder(result.WON, SentRiddles.get(i).getRiddle());
                     SentRiddles.remove(i);
                 }
-                else if(SentRiddles.get(i).checkAnswer(Ans) == 0) msg = "Riddle: " + SentRiddles.get(i).getRiddle() + "\nSorry, close but not quite.";
-                else msg = "Riddle: " + SentRiddles.get(i).getRiddle() + "\nWrong answer try again!";
+                else if(SentRiddles.get(i).checkAnswer(Ans) == 0) msg = msgStringBuilder(result.ALMOST, SentRiddles.get(i).getRiddle());
+                else msg = msgStringBuilder(result.LOST, SentRiddles.get(i).getRiddle());
                 SmsManager smsManager = SmsManager.getDefault();
                 smsManager.sendTextMessage(phoneNo, null, msg, null, null);
                 break;
             }
+        }
+    }
+
+    private String msgStringBuilder(result r, String riddle)
+    {
+        String msg = "";
+        int sc = getHistoryByRiddle(riddle).getSolvedCount();
+        String position = intToOrdinal(sc);
+        switch (r)
+        {
+            case WON:
+                msg = "Riddle: " + riddle + "\nCorrect answer! You won!!!\nYou've placed " + position + " on the battlefield.\n";
+                break;
+            case ALMOST:
+                msg =  "Riddle: " + riddle + "\nSorry, close but not quite.";
+                break;
+            case LOST:
+                msg = "Riddle: " + riddle + "\nWrong answer try again!";
+                break;
+        }
+        return msg;
+    }
+
+    private String intToOrdinal(int i)
+    {
+        String[] suffixes = new String[]{"th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"};
+        switch (i % 100) {
+            case 11:
+            case 12:
+            case 13:
+                return i + "th";
+            default:
+                return i + suffixes[i % 10];
+
         }
     }
 }

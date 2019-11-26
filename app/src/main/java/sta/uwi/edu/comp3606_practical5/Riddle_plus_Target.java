@@ -2,15 +2,17 @@ package sta.uwi.edu.comp3606_practical5;
 
 public class Riddle_plus_Target
 {
+    private int riddleid;
     private String phoneNo;
     private String riddle;
     private String solution;
 
-    public  Riddle_plus_Target(String phoneNo, String riddle, String solution)
+    public  Riddle_plus_Target(String phoneNo, String riddle, String solution, int riddleid)
     {
         this.phoneNo = phoneNo;
         this.riddle = riddle;
         this.solution = solution;
+        this.riddleid = riddleid;
     }
 
     public int checkAnswer(String Ans)
@@ -26,5 +28,10 @@ public class Riddle_plus_Target
 
     public String getRiddle() {
         return riddle;
+    }
+
+    public int getRiddleid()
+    {
+        return riddleid;
     }
 }
